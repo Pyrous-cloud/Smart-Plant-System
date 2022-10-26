@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Smart Plant System</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="/static/css/styles.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/93c05b8bb5.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <script>
+        $(document).ready(() => {
+            // Edit settings button
+            $('.editSettings').click(() => {
+                // Retrieve values
+                var min_light_level = $('#min_light_level').val();
+                var watering_duration = $('#watering_duration').val();
+                var interval = $('#interval').val();
+                var server_ip = $('#server-ip').val();
+
+                // Regex to check if value is numerical
+                var isValid = /^[0-9]*$/.test(min_light_level);
+                var isValid2 = /^[0-9]*$/.test(watering_duration);
+                var isValid3 = /^[0-9]*$/.test(interval);
+
+                // Data validation
+                if (min_light_level == '' || watering_duration == '' || interval == '') {
+                    window.alert('Please fill in all fields!');
+                    return false;
+                } else if (!isValid || !isValid2 || !isValid3) {
+                    window.alert('Please enter integer values!');
+                    return false;
+                } else if ((parseInt(min_light_level) < 0) || (parseInt(min_light_level) > 100)) {
+                    window.alert('Please enter a value from 0-100 for minimum light level!');
+                    return false;
+                } else if ((parseInt(watering_duration) < 5)) {
+                    window.alert('Please enter a value of at least 5 for watering duration!');
+                    return false;
+                } else if ((parseInt(interval) < 20)) {
+                    window.alert('Please enter a value of at least 20 for interval!');
+                    return false;
+                }
+
+                // Create JSON to send
+                var data = `{"min_light_level": ${min_light_level}, "watering_duration": ${watering_duration}, "interval": ${interval}}`
+
+                // Ajax call to endpoint
+                $.ajax({
+                    url: `http://${server_ip}:5000/edit`,
+                    type: 'POST',
+                    'headers': {
+                        'Content-Type': 'application/json'
+                    },
+                    data: data,
+                    success: (data, textStatus, xhr) => {
+                        window.alert('Settings updated successfully!')
+                        location.reload();
+                    },
+                    error: (xhr, textStatus, errorThrown) => {
+                        window.alert('An error happened on our server, please try again later!')
+                    }
+                });
+            });
+        });
+
+        // // Disable enter key
+        $(document).keypress(
+            function (event) {
+                if (event.which == '13') {
+                    event.preventDefault();
+                }
+            });
+    </script>
+
+    <!-- Main content -->
+    <main class="flex-shrink-0">
+        <!-- Navigation bar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container px-5">
+                <a class="navbar-brand" href="#"><i class="fa fa-seedling"></i>Smart Plant System</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <header class="main py-5">
+            <div class="container px-5">
+                <div class="row gx-5 align-items-center justify-content-center">
+                    <div class="col-lg-8 col-xl-7 col-xxl-6">
+                        <div class="my-5 text-center text-xl-start">
+                            <h1 class="display-5 fw-bolder text-white mb-2">
+                                Smart Plant System 1.0
+                            </h1>
+                            <p class="lead fw-normal text-white mb-4">
+                                Smart Plant System is a fully automatic plant monitoring that
+                                can water and provide light for your plants. This is an IoT
+                                program made with Python and Raspberry Pi.
+                            </p>
+                            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
+                                <a class="btn btn-dark btn px-4 me-sm-3" href="#graphs"><i class="far fa-eye"></i>
+                                    Monitor Plants</a>
+                                <a class="btn btn-outline-light btn px-4" href="#settings"><i class="fas fa-tools"></i>
+                                    Edit
+                                    Settings</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Image from: https://post.healthline.com/wp-content/uploads/2020/05/435791-Forget-You-Have-Plants-11-Types-That-Will-Forgive-You_Thumnail.jpg -->
+                    <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
+                        <img class="img-fluid rounded-3 my-5" src="/static/img/plant.jpg" alt="..." />
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Light levels graph -->
+        <section class="py-5 mt-3" id="graphs">
+            <div class="container px-5 my-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-6">
+                        <iframe class="mb-5 mb-lg-0 w-100" height="400px" style="border: 2px solid #cccccc"
+                            src="https://thingspeak.com/channels/1624174/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&yaxis=Light+Level+%25&width=auto&height=auto&api_key=****"></iframe>
+                    </div>
+                    <div class="col-lg-6">
+                        <h2 class="fw-bolder">Light Levels</h2>
+                        <p class="lead fw-normal text-muted mb-0">
+                            Smart Plant System measures the light levels around the plant
+                            in percentages 0-100%. Owners can set the minimum light level
+                            e.g. 20% before the LED lights up and provide light to the
+                            plant. The brightness of the LED is adjusted to the surrounding
+                            light level using pulse width modulation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Moisture level graph -->
+        <section class="bg-light py-5">
+            <div class="container px-5 my-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-6 order-first order-lg-last">
+                        <iframe class="mb-5 mb-lg-0 w-100" height="400px" style="border: 2px solid #cccccc"
+                            src="https://thingspeak.com/channels/1624174/charts/2?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=step&yaxis=Moisture+Level+%281+or+0%29&width=auto&height=auto&api_key=****"></iframe>
+                    </div>
+                    <div class="col-lg-6">
+                        <h2 class="fw-bolder">Moisture Levels</h2>
+                        <p class="lead fw-normal text-muted mb-0">
+                            Smart Plant System measures the moisture level of the soil using 1 for high moisture and 0
+                            for low
+                            moisture.
+                            If there is low moisture, it will rotate the actuator and water the plants. Owners can
+                            control how much
+                            water
+                            is provided by configuring the amount of time the actuator stays rotated e.g. 30 seconds.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration -->
+        <section class="py-5" id="settings">
+            <div class="container px-5 mt-5">
+                <div class="row gx-5">
+                    <div class="col-lg-12">
+                        <div class="row gx-5 row-cols-1 row-cols-md-3">
+                            <div class="col mb-5 mb-md-0 h-100">
+                                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3">
+                                    <i class="far fa-sun"></i>
+                                </div>
+                                <h2 class="h5">Current Minimum Light Level: <span class="text-muted">{{ min_light_level
+                                        }}%</span></h2>
+                                <p class="mb-0">
+                                    This value determines the minimum light level before the LED activates.
+                                    This feature is for light sensitive plants and can also save electricity.
+                                </p>
+                            </div>
+                            <div class="col mb-5 mb-md-0 h-100">
+                                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3">
+                                    <i class="fas fa-tint"></i>
+                                </div>
+                                <h2 class="h5">Current Watering Duration: <span class="text-muted">{{ watering_duration
+                                        }}s</span></h2>
+                                <p class="mb-0">
+                                    This value controls the amount of time the actuator rotates for.
+                                    This feature is used to control the amount of water provided to the plant.
+                                </p>
+                            </div>
+                            <div class="col mb-5 mb-md-0 h-100">
+                                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h2 class="h5">Current Interval: <span class="text-muted">{{ interval }}s</span></h2>
+                                <p class="mb-0">
+                                    This value controls the interval of when the system checks the plants.
+                                    This feature is used to adjust how often the moisture and light levels are recorded.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="py-5 mb-1">
+
+            <!-- Button for editing settings -->
+            <div class="container px-5 text-center">
+                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editModal">
+                    <i class="fas fa-tools"></i> Edit Settings</button>
+            </div>
+        </section>
+
+        <!-- Weather widget-->
+        <section class="py-5 bg-light">
+            <div class="container px-5 my-5">
+                <a class="weatherwidget-io" href="https://forecast7.com/en/1d35103d82/singapore/" data-label_1="SINGAPORE" data-label_2="WEATHER" data-theme="pure" >SINGAPORE WEATHER</a>
+                <script>
+                !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+                </script>
+            </div>
+        </section>
+
+        <!-- Logs -->
+        <section class="py-5">
+            <div class="container px-5 my-5">
+                <div class="row gx-5 justify-content-center">
+                    <div class="col-lg-6 mb-5 mb-lg-0">
+                        <h3 class="fw-bolder">LED Log</h3>
+                        <p class="fw-normal mb-2">
+                            This log contains the date and time where the LED is triggered.
+                        </p>
+                        <div class="led-log">{{ led_log|safe }}</div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="fw-bolder">Water Log</h3>
+                        <p class="fw-normal mb-2">
+                            This log contains the date and time where the actuator is triggered.
+                        </p>
+                        <div class="water-log">{{ water_log|safe }}</div>
+                    </div>
+
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- Blog preview section-->
+        <section class="py-5 bg-light">
+            <div class="container px-5 my-5">
+                <!-- Call to action-->
+                <aside class="bg-primary bg-gradient rounded-3 p-4 p-sm-5 mt-5">
+                    <div
+                        class="d-flex align-items-center justify-content-between flex-column flex-xl-row text-center text-xl-start">
+                        <div class="mb-4 mb-xl-0">
+                            <div class="fs-3 fw-bold text-white">
+                                New products, delivered to you.
+                            </div>
+                            <div class="text-white-50">
+                                Sign up for our newsletter for the latest updates.
+                            </div>
+                        </div>
+                        <div class="ms-xl-4">
+                            <div class="input-group mb-2">
+                                <input class="form-control" type="text" placeholder="Email address..."
+                                    aria-label="Email address..." aria-describedby="button-newsletter" />
+                                <button class="btn btn-outline-light" id="button-newsletter" type="button">
+                                    Sign up
+                                </button>
+                            </div>
+                            <div class="small text-white-50">
+                                We care about privacy, and will never share your data.
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto">
+                    <div class="small m-0 text-white">
+                        Copyright &copy; Smart Plant System 2022
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <a class="link-light small" href="#!">Privacy</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Terms</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for editting configurations -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="genreId2" class="col-form-label">Minimum Light Level <small
+                                    id="passwordHelpInline" class="text-muted">(integers, 0-100%)</small>:</label>
+                            <input type="text" class="form-control" id="min_light_level"
+                                placeholder="Minimum Light Level" value="{{ min_light_level }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="genreId2" class="col-form-label">Watering Duration <small
+                                    id="passwordHelpInline" class="text-muted">(integers, minimum 5s)</small>:</label>
+                            <input type="text" class="form-control" id="watering_duration"
+                                placeholder="Watering Duration" value="{{ watering_duration }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="genreId2" class="col-form-label">Interval <small id="passwordHelpInline"
+                                    class="text-muted">(integers, minimum 20s)</small>:</label>
+                            <input type="text" class="form-control" id="interval" placeholder="Interval"
+                                value="{{ interval }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="server-ip"
+                                value="{{ request.host.split(':')[0] }}" hidden required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success editSettings">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
