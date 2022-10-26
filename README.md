@@ -19,8 +19,12 @@ Smart Plant System keeps a log of when light or water is provided to your plant.
 <br>
 ![image-4](images/image-4.png)
 
+## Receive Notifications
+Smart Plant System automatically alerts owners through Twitter during an event.
+![image-5](images/image-5.png)
+
 # Template
 Template used: https://startbootstrap.com/template/heroic-features
 
 # Notes
-- Write API key removed from app.py
+- Removed API keys
